@@ -1,4 +1,4 @@
-#include "plugin.h"
+﻿#include "plugin.h"
 #include "PlatformBase.h"
 #include "PluginAPI.h"
 
@@ -20,9 +20,22 @@ extern "C" UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsAPIReady() {
 	return api != nullptr;
 }
 
-extern "C" UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API LoadModel(const char* file) {
+extern "C"
+UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API RegisterProcessCallback(on_loadprocess callback)
+{
+	if (api == nullptr) { return; }
+	api->RegisterProcessCallback(callback);
+}
+
+UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetModelProcess(const char* fileMd5, float process)
+{
+	if (api == nullptr) { return; }
+	api->splat.SetProcessInfo(fileMd5, process);
+}
+
+UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API LoadModel(const char* file, const char* fileName, const char* fileMd5, int loadType) {
 	if (api == nullptr) { return false; }
-	return api->LoadModel(file);
+	return api->LoadModel(file, fileName, fileMd5, loadType);
 }
 
 extern "C" UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API CopyModelToCuda() {
@@ -33,6 +46,12 @@ extern "C" UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API CopyModelToCuda() {
 extern "C" UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API RemoveModelFromCuda(int model) {
 	if (api == nullptr) { return false; }
 	return api->RemoveModelFromCuda(model);
+}
+
+UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetShowShDegree(int showDegree)
+{
+	if (api == nullptr) { return; }
+	api->SetShowShDegree(showDegree);
 }
 
 extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetActiveModel(int model, bool active) {

@@ -1,10 +1,16 @@
-#pragma once
+﻿#pragma once
 
 #include <Eigen/Eigen>
 #include <cuda_runtime.h>
 #include <mutex>
+#include "plugin.h"
+
+#define kChunkSize 256
+
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 typedef Eigen::Matrix<float, 3, 1, Eigen::DontAlign> Vector3f;
+typedef Eigen::Matrix<float, 4, 1, Eigen::DontAlign> Vector4f;
 typedef Eigen::Matrix<float, 6, 1, Eigen::DontAlign> Vector6f;
 typedef	Eigen::Matrix<float, 4, 4, Eigen::DontAlign, 4, 4> Matrix4f;
 
@@ -16,6 +22,7 @@ struct Rot { float rot[4]; };
 class GaussianSplattingRenderer {
 	//TODO: create a parameters
 	int _sh_degree = 3; //used when learning 3 is the default value
+	int _show_sh_degree = 3; //used when learning 3 is the default value
 	bool _fastCulling = true;
 	float _scalingModifier = 1.0;
 	
@@ -77,9 +84,22 @@ public:
 	std::vector<Scale> scale;
 	std::vector<float> opacity;
 	std::vector<SHs<3>> shs;
+	
+	struct FileConfig {
+		const char* fileName = nullptr;
+		const char* fileMd5 = nullptr;
+		int loadedType = 0;
+	};
+
+	on_loadprocess modelLoadProcess = nullptr;
+
+	std::map<std::string, FileConfig*> fileConfigData;
 
 public:
-	void Load(const char* file) throw(std::bad_exception);
+	void SetLoadedFileConfig(const char* fileName, const char* fileMd5,int loadedType);
+	void Load(const char* file, const char* fileMd5) throw(std::bad_exception);
+	void LoadCompressed(const char* file, const char* fileMd5) throw(std::bad_exception);
+	void SetShowShDegree(int showDegree) { _show_sh_degree = showDegree; }
 	int CopyToCuda();
 	void RemoveModel(int model) throw(std::bad_exception);
 	void SetActiveModel(int model, bool active);
@@ -91,7 +111,7 @@ public:
 	void SetModelCrop(int model, float* box_min, float* box_max);
 	void GetModelCrop(int model, float* box_min, float* box_max);
 	int GetNbSplat();
-
+	void SetProcessInfo(const char* fileMd5,float process);
 private:
 	void AllocateRenderContexts();
 };

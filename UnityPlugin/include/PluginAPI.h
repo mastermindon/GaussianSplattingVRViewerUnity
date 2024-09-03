@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Unity/IUnityInterface.h"
 #include "Unity/IUnityGraphics.h"
@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "plugin.h"
 
 struct POV {
 	int width = 0;
@@ -64,10 +65,14 @@ public:
 	virtual ~PluginAPI();
 	const char* GetLastMessage();
 
-	bool LoadModel(const char* file);
+	void RegisterProcessCallback(on_loadprocess callback);
+
+	bool LoadModel(const char* file, const char* fileName, const char* fileMd5, int loadType);
 	int CopyModelToCuda();
 	bool RemoveModelFromCuda(int model);
 	void SetActiveModel(int model, bool active);
+
+	void SetShowShDegree(int showDegree);
 	
 	int CreatePov();
 	void RemovePov(int pov);

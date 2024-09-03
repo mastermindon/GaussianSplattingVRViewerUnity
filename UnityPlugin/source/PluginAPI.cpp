@@ -1,4 +1,4 @@
-#define _USE_MATH_DEFINES
+﻿#define _USE_MATH_DEFINES
 
 #include "PluginAPI.h"
 #include "GLPluginAPI.h"
@@ -21,10 +21,36 @@ const char* PluginAPI::GetLastMessage() {
 	return _message.c_str();
 }
 
-bool PluginAPI::LoadModel(const char* file) {
+void PluginAPI::RegisterProcessCallback(on_loadprocess callback)
+{
+	splat.modelLoadProcess = callback;
+}
+
+bool PluginAPI::LoadModel(const char* file, const char* fileName, const char* fileMd5, int loadType) {
 	if (file == nullptr) { _message = "filepath cannot be null"; return false; }
 	try {
-		splat.Load(file);
+		std::string filename = file;
+		std::string extension = filename.substr(filename.find_last_of(".") + 1);
+		splat.SetLoadedFileConfig(fileName, fileMd5, loadType);
+		if (loadType == 1)
+		{
+			splat.Load(file, fileMd5);
+		}
+		else if(loadType == 2)
+		{
+			splat.LoadCompressed(file, fileMd5);
+		}
+		else
+		{
+			if (extension == "ply")
+			{
+				splat.Load(file, fileMd5);
+			}
+			else if (extension == "bin")
+			{
+				splat.LoadCompressed(file, fileMd5);
+			}
+		}
 	}
 	catch (std::bad_exception ex) {
 		_message = ex.what();
@@ -146,6 +172,10 @@ void PluginAPI::SetDrawParameters(int pov, int model, float* position, float* ro
 
 void PluginAPI::SetActiveModel(int model, bool active) {
 	splat.SetActiveModel(model, active);
+}
+
+void PluginAPI::SetShowShDegree(int showDegree) {
+	splat.SetShowShDegree(showDegree);
 }
 
 void PluginAPI::Preprocess() {

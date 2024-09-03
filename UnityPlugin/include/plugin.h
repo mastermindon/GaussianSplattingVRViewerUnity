@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Unity/IUnityInterface.h"
 #include "Unity/IUnityGraphics.h"
 
@@ -10,12 +10,18 @@ extern "C" UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsAPIReady();
 extern "C" UNITY_INTERFACE_EXPORT const char* UNITY_INTERFACE_API GetLastMessage();
 extern "C" UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetNbSplat();
 
+typedef void(*on_loadprocess)(const char*,const char*,float);
+
+extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API RegisterProcessCallback(on_loadprocess callback);
+extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetModelProcess(const char* fileMd5,float process);
+
 //Load a model to cpu, call CopyModelToCuda to create a model index and draw it
-extern "C" UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API LoadModel(const char* file);
+extern "C" UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API LoadModel(const char* file,const char* fileName,const char* fileMd5,int loadType);
 
 //Multi model management
 extern "C" UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API CopyModelToCuda();
 extern "C" UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API RemoveModelFromCuda(int model);
+extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetShowShDegree(int showDegree);
 extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetActiveModel(int model, bool active);
 extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetModelCrop(int model, float* box_min, float* box_max);
 extern "C" UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetModelCrop(int model, float* box_min, float* box_max);
